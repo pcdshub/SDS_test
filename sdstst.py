@@ -170,13 +170,10 @@ def leak_test(actuator_object, valve_number, port, flow_rate_list):
 			break
 		else:
 			try:
-				pressure_settle_at = read_flow_rate[next(len(read_pressure)-i for i in range(2,len(read_pressure)-1) if abs(read_pressure[-i]/read_pressure[-1])>1.02)]-read_flow_rate[0]
+				pressure_settle_at = settled_value(read_pressure)
 				leak_status = 1 #leak
 			except StopIteration:
 				leak_status = 0 #no leak
-			except  ZeroDivisionError:
-				leak_status = 2 # not definitive. pump not running
-				# leak_status = 0 #no leak
 
 		read_pressure.append(Pump.pressure)
 		# read_flow_rate.append(Pump.flow_rate)
@@ -185,6 +182,19 @@ def leak_test(actuator_object, valve_number, port, flow_rate_list):
 	leak_test_dict['flow_rate:valve%d:port%d'%(valve_number, port)] = read_flow_rate
 	leak_test_dict['pressure:valve%d:port%d'%(valve_number, port)] = read_pressure
 	return leak_test_dict, leak_status
+
+def plot_leak_test(valve, leak_test_ports, leak_test_df):
+	for index, port in enumerate(leak_test_ports):
+		plt.subplot(1, 12, port)
+		plt.plot(leak_test_df['flow_rate:valve%d:port%d'%(valve, port)], leak_test_df['pressure:valve%d:port%d'%(valve, port)])
+		plt.title('port %d' %port)
+		plt.xlabel('flow_rate (mL/min)')
+		plt.ylabel('pressure (psi)')
+	plt.tight_layout()
+	plt.suptitle('pressure vs flow rate for valve %d' %valve)
+	plt.subplots_adjust(top = 0.85)
+	plt.savefig("./plots/leak_test/%s_pressure_vs_flow_rate:valve%d" %(unique_id, valve))
+
 
 def leak_test_multiple_ports(actuator_object, valve_number, ports_to_test, flow_rate_list):
 	leak_test_dict = {}
@@ -220,16 +230,8 @@ while True:
 	# plot
 	logger.info('plotting flow rate vs pressure. you can see the graph at ./plots/leak_test')
 	for valve in (1,2):
-		for port in range(1,13):
-			plt.subplot(1, 12, port)
-			plt.plot(leak_test_df['flow_rate:valve%d:port%d'%(valve, port)], leak_test_df['pressure:valve%d:port%d'%(valve, port)])
-			plt.title('port %d' %port)
-			plt.xlabel('flow_rate (mL/min)')
-			plt.ylabel('pressure (psi)')
-		plt.tight_layout()
-		plt.suptitle('pressure vs flow rate for valve %d' %valve)
-		plt.subplots_adjust(top = 0.85)
-		plt.savefig("./plots/leak_test/%s_pressure_vs_flow_rate:valve%d" %(unique_id, valve))
+		plot_leak_test(valve, v1_leak_test_ports, leak_test_df)
+		plot_leak_test(valve, v2_leak_test_ports, leak_test_df)
 	# display leak status
 	logger.info("Here is the leak status:\n%s\n%s" %(leak_status_valve1_dict, leak_status_valve2_dict))
 	# give user option to repair an rerun the leak test if there is leak
@@ -237,33 +239,20 @@ while True:
 		if get_user_confirmation("Do you want to repair the leaking tubes to rerun the leaking test? ", 30, 'n') == True:
 			run += 1
 			input('Repair those ports and press enter to continue')
-			v1_leak_test_ports = list(map(int, input('what ports from valve 1 do you want to test (type them separated by comma): ').replace(' ', '').split(',')))
-			v2_leak_test_ports = list(map(int, input('what ports from valve 2 do you want to test (type them separated by comma): ').replace(' ', '').split(',')))
+			try:
+				v1_leak_test_ports = list(map(int, input('what ports from valve 1 do you want to test (type them separated by comma): ').replace(' ', '').split(',')))
+			except ValueError:
+				v1_leak_test_ports = []
+			try:
+				v2_leak_test_ports = list(map(int, input('what ports from valve 2 do you want to test (type them separated by comma): ').replace(' ', '').split(',')))
+			except ValueError:
+				v2_leak_test_ports = []
 			continue
 		else:
 			break
 	else:
 		break
 
-# # just trying to run leak test for 1 valve
-# while True:
-# 	run = 1
-# 	leak_test_valve1_dict, leak_status_valve1_dict = leak_test_multiple_ports(Actuator1, 1, v1_leak_test_ports, flow_rate_list)
-# 	leak_test_dict.update(leak_test_valve1_dict)
-# 	leak_test_df = pd.DataFrame.from_dict(leak_test_dict, orient='index').transpose()
-# 	leak_test_df.to_csv("./data/leak_test/%s_leak_test_run_%d.csv" %(unique_id, run))
-# 	logger.info("Here is the leak status:\n%s" %(leak_status_valve1_dict))
-# 	if 'leaking' in leak_status_valve1_dict.values():
-# 		if get_user_confirmation("Do you want to repair the leaking tubes to rerun the leaking test? ", 30, 'n') == True:
-# 			run += 1
-# 			input('Repair those ports and press enter to continue')
-# 			v1_leak_test_ports = list(map(int, input('what ports from valve 1 do you want to test (type them separated by comma): ').replace(' ', '').split(',')))
-# 			v2_leak_test_ports = list(map(int, input('what ports from valve 2 do you want to test (type them separated by comma): ').replace(' ', '').split(',')))
-# 			continue
-# 		else:
-# 			break
-# 	else:
-# 		break
 logger.info("LEAK TEST COMPLETE")
 
 if get_user_confirmation('Do you want to continue to characterization test?(yes/no) ', 300, 'n') == False:
@@ -375,8 +364,8 @@ def characterization_run(actuator_object, tube_object, valve_number, flow_rate_l
 					break
 			# find pressure settling time
 			try:
-				temp_list.append(time_points[next(len(read_pressure)-i for i in range(2,len(read_pressure)-1) if abs(read_pressure[-i]/read_pressure[-1])>1.02)]-time_points[0])
-			except (StopIteration, ZeroDivisionError):
+				temp_list.append(settling_time(read_pressure))
+			except StopIteration:
 				temp_list.append('NaN')
 			
 			temp_df['pressure(valve%d)(port%d)(flow_rate%d)' %(valve_number, port, index+1)] = read_pressure
@@ -408,84 +397,68 @@ logger.info("CHARACTERIZATION RUN COMPLETE")
 
 ################################################# PLOT from characterization data #############################################
 
-logger.info("plotting the data...")
-if which_valve_to_test == 1 or which_valve_to_test == 2:
-	for index, flow_rate in enumerate(flow_rate_list):
-		for i, port in enumerate(ports_to_test):
-			plt.subplot(1, len(ports_to_test), i+1)
-			plt.plot(char_df['time'], char_df['volume(valve%d)(port%d)(flow_rate%d)' %(which_valve_to_test, port, index+1)].tolist())
+def plot_vol_vs_time(flow_rates, df, valve, ports, uid):
+	for index, flow_rate in enumerate(flow_rates):
+		for i, port in enumerate(ports):
+			plt.subplot(1, len(ports), i+1)
+			plt.plot(df['time'], df['volume(valve%d)(port%d)(flow_rate%d)' %(valve, port, index+1)].tolist())
 			plt.xlabel('time (seconds)')
 			plt.ylabel('volume used (mL)')
-		plt.legend(['flow= %.4f mL/min' %flow_rate for flow_rate in flow_rate_list])
-		plt.suptitle("valve %d" %which_valve_to_test, fontsize="x-large")
-	plt.savefig("./plots/characterization/%s_volume_vs_time:valve_%d" %(unique_id, which_valve_to_test))
+		plt.legend(['flow= %.4f mL/min' %flow_rate for flow_rate in flow_rates])
+		plt.suptitle("valve %d" %valve, fontsize="x-large")
+	plt.savefig("./plots/characterization/%s_volume_vs_time:valve_%d" %(uid, valve))
 
-if which_valve_to_test == 3:
-	for valve in range(1,3): # 1 and 2 valves
-		for index, flow_rate in enumerate(flow_rate_list):
-			for i, port in enumerate(ports_to_test):
-				plt.subplot(1, len(ports_to_test), i+1)
-				plt.plot(char_df['time'], char_df['volume(valve%d)(port%d)(flow_rate%d)' %(valve, port, index+1)].tolist())
-				plt.xlabel('time (seconds)')
-				plt.ylabel('volume used (mL)')
-			plt.legend(['flow= %.4f mL/min' %flow_rate for flow_rate in flow_rate_list])
-			plt.suptitle("valve %d" %valve, fontsize="x-large")
-		plt.savefig("./plots/characterization/%s_volume_vs_time:valve_%d" %(unique_id, valve))
-
-# plot pressure vs time
-if which_valve_to_test == 1 or which_valve_to_test == 2:
-	for index, flow_rate in enumerate(flow_rate_list):
-		for i, port in enumerate(ports_to_test):
-			plt.subplot(1, len(ports_to_test), i+1)
-			plt.plot(char_df['time'], char_df['pressure(valve%d)(port%d)(flow_rate%d)' %(which_valve_to_test, port, index+1)].tolist())
+def plot_pressure_vs_time(flow_rates, df, valve, ports, uid):
+	for index, flow_rate in enumerate(flow_rates):
+		for i, port in enumerate(ports):
+			plt.subplot(1, len(ports), i+1)
+			plt.plot(df['time'], df['pressure(valve%d)(port%d)(flow_rate%d)' %(valve, port, index+1)].tolist())
 			plt.xlabel('time (seconds)')
 			plt.ylabel('pressure (psi)')
-		plt.legend(['flow= %.4f mL/min' %flow_rate for flow_rate in flow_rate_list])
-		plt.suptitle("valve %d" %which_valve_to_test, fontsize="x-large")
-	plt.savefig("./plots/characterization/%s_pressure_vs_time:valve_%d" %(unique_id, which_valve_to_test))
+		plt.legend(['flow= %.4f mL/min' %flow_rate for flow_rate in flow_rates])
+		plt.suptitle("valve %d" %valve, fontsize="x-large")
+	plt.savefig("./plots/characterization/%s_pressure_vs_time:valve_%d" %(uid, valve))
 
-if which_valve_to_test == 3:
-	for valve in range(1,3): # 1 and 2 valves
-		for index, flow_rate in enumerate(flow_rate_list):
-			for i, port in enumerate(ports_to_test):
-				plt.subplot(1, len(ports_to_test), i+1)
-				plt.plot(char_df['time'], char_df['pressure(valve%d)(port%d)(flow_rate%d)' %(valve, port, index+1)].tolist())
-				plt.xlabel('time (seconds)')
-				plt.ylabel('pressure (psi)')
-			plt.legend(['flow= %.4f mL/min' %flow_rate for flow_rate in flow_rate_list])
-			plt.suptitle("valve %d" %valve, fontsize="x-large")
-		plt.savefig("./plots/characterization/%s_pressure_vs_time:valve_%d" %(unique_id, valve))
-
-# plot pressure vs flow rate
-if which_valve_to_test == 1 or which_valve_to_test == 2:
-	for i, port in enumerate(ports_to_test):
+def plot_pressure_vs_flow_rate(flow_rates, df, valve, ports, uid):
+	for i, port in enumerate(ports):
 		final_pressure = []
-		for i_f, flow_rate in enumerate(flow_rate_list):
-			final_pressure.append(char_df['pressure(valve%d)(port%d)(flow_rate%d)' %(which_valve_to_test, port, i_f+1)].tolist()[-1])
-		plt.subplot(1, len(ports_to_test), i+1)
-		plt.plot(flow_rate_list, final_pressure) # pressure is settled pressure
+		for i_f, flow_rate in enumerate(flow_rates):
+			final_pressure.append(df['pressure(valve%d)(port%d)(flow_rate%d)' %(valve, port, i_f+1)].tolist()[-1])
+		plt.subplot(1, len(ports), i+1)
+		plt.plot(flow_rates, final_pressure) # pressure is settled pressure
 		plt.title('port %d' %port)
 		plt.xlabel('flow rate (mL/min)')
 		plt.ylabel('pressure (psi)')
 	plt.tight_layout()
-	plt.suptitle("pressure vs flowrate for valve %d" %which_valve_to_test, fontsize = 'x-large')
+	plt.suptitle("pressure vs flowrate for valve %d" %valve, fontsize = 'x-large')
 	plt.subplots_adjust(top = 0.85)
-	plt.savefig("./plots/characterization/%s_pressure_vs_flow_rate:valve%d" %(unique_id, which_valve_to_test))
+	plt.savefig("./plots/characterization/%s_pressure_vs_flow_rate:valve%d" %(uid, valve))
+
+logger.info("plotting the data...")
+# plot vol vs time
+if which_valve_to_test == 1 or which_valve_to_test == 2:
+	plot_vol_vs_time(flow_rate_list, char_df, which_valve_to_test, ports_to_test, unique_id)
+elif which_valve_to_test == 3:
+	for valve in range(1,3): # 1 and 2 valves
+		plot_vol_vs_time(flow_rate_list, char_df, valve, ports_to_test, unique_id)
+
+# plot pressure vs time
+if which_valve_to_test == 1 or which_valve_to_test == 2:
+	plot_pressure_vs_time(flow_rate_list, char_df, which_valve_to_test, ports_to_test, unique_id)
+elif which_valve_to_test == 3:
+	for valve in range(1,3): # 1 and 2 valves
+	plot_pressure_vs_time(flow_rate_list, char_df, valve, ports_to_test, unique_id)
+		
+
+# plot pressure vs flow rate
+if which_valve_to_test == 1 or which_valve_to_test == 2:
+	plot_pressure_vs_flow_rate(flow_rate_list, char_df, which_valve_to_test, ports_to_test, unique_id)
+
 
 if which_valve_to_test == 3:
 	for valve in range(1,3):
-		for i, port in enumerate(ports_to_test):
-			final_pressure = []
-			for i_f, flow_rate in enumerate(flow_rate_list):
-				final_pressure.append(char_df['pressure(valve%d)(port%d)(flow_rate%d)' %(which_valve_to_test, port, i_f+1)].tolist()[-1])
-			plt.subplot(1, len(ports_to_test), i+1)
-			plt.plot(flow_rate_list, final_pressure) # pressure is settled pressure
-			plt.title('port %d' %port)
-			plt.xlabel('flow rate (mL/min)')
-			plt.ylabel('pressure (psi)')
-		plt.tight_layout()
-		plt.suptitle("pressure vs flowrate for valve %d" %which_valve_to_test, fontsize = 'x-large')
-		plt.subplots_adjust(top=0.85)
-		plt.savefig("./plots/characterization/%s_pressure_vs_flow_rate:valve%d" %(unique_id, which_valve_to_test))
+		plot_pressure_vs_flow_rate(flow_rate_list, char_df, valve, ports_to_test, unique_id)
 
 logger.info("visit ./plots/characterization to view the plots")
+
+##################################################### Saving results to confluence ################################################################
