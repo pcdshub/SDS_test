@@ -107,91 +107,91 @@ Valve2_Tube.length = valve2_tube_inner_diameter
 
 
 ####################################### HPLC pump PULSATION TEST ###############################################
-flow_rate = (Pump.min_flow + Pump.max_flow) / 2
-logger.info("RUNNING HPLC PUMP PULSATION TEST")
-# selecting the port for pulsation test
-Actuator1.goto_port(5)
-while True:
-	pulsation = Pump.get_pulsation(flow_rate)
-	logger.info("pulsation is %f" %pulsation)
-	if get_user_confirmation("satisfied with pulsation test? [y/n]\n\tpress y if you want to continue\n\tpress n if you want to rerun the test: ", 30, 'y') == True:
-		break
-	else:
-		input("did you repair the device? press enter key when ready")
-		logger.info("re-running the pulsation test...")
-		continue
-logger.info("PULSATION TEST COMPLETE")
+# flow_rate = (Pump.min_flow + Pump.max_flow) / 2
+# logger.info("RUNNING HPLC PUMP PULSATION TEST")
+# # selecting the port for pulsation test
+# Actuator1.goto_port(5)
+# while True:
+# 	pulsation = Pump.get_pulsation(flow_rate)
+# 	logger.info("pulsation is %f" %pulsation)
+# 	if get_user_confirmation("satisfied with pulsation test? [y/n]\n\tpress y if you want to continue\n\tpress n if you want to rerun the test: ", 30, 'y') == True:
+# 		break
+# 	else:
+# 		input("did you repair the device? press enter key when ready")
+# 		logger.info("re-running the pulsation test...")
+# 		continue
+# logger.info("PULSATION TEST COMPLETE")
 
 
 ######################################### STANDATD LEAK TEST ####################################################
-logger.info("LEAK TEST")
-input("plug all water and sample valve ports. press  enter when done.")
-# set max pressure to 500 more than upper pressure limit
-while True:
-	try:
-		upper_pressure_limit = float(get_user_input("what is the upper pressure limit (psi) > ", 30, '3500'))
-		break
-	except ValueError:
-		print("This is not a valid number")
-		continue
-Pump.max_pressure = upper_pressure_limit
+# logger.info("LEAK TEST")
+# input("plug all water and sample valve ports. press  enter when done.")
+# # set max pressure to 500 more than upper pressure limit
+# while True:
+# 	try:
+# 		upper_pressure_limit = float(get_user_input("what is the upper pressure limit (psi) > ", 30, '3500'))
+# 		break
+# 	except ValueError:
+# 		print("This is not a valid number")
+# 		continue
+# Pump.max_pressure = upper_pressure_limit
 
-# how many flow rates to test for each port
-while True:
-	try:
-		how_many_flow_rates = int(get_user_input("how many flow rates do you want to test? ", 30, '10'))
-		break
-	except ValueError:
-		print("This is not a valid number")
-		continue
-flow_rate_list = [Pump.min_flow + x*(Pump.max_flow-Pump.min_flow)/(how_many_flow_rates-1) for x in range(how_many_flow_rates-1)]
-flow_rate_list.append(Pump.max_flow)
+# # how many flow rates to test for each port
+# while True:
+# 	try:
+# 		how_many_flow_rates = int(get_user_input("how many flow rates do you want to test? ", 30, '10'))
+# 		break
+# 	except ValueError:
+# 		print("This is not a valid number")
+# 		continue
+# flow_rate_list = [Pump.min_flow + x*(Pump.max_flow-Pump.min_flow)/(how_many_flow_rates-1) for x in range(how_many_flow_rates-1)]
+# flow_rate_list.append(Pump.max_flow)
 
-# leak test for ports of both valves
-logger.info("STARTING LEAK TEST")
-leak_test_dict = {}
-v1_leak_test_ports = list(range(1,13))
-v2_leak_test_ports = list(range(1,13))
+# # leak test for ports of both valves
+# logger.info("STARTING LEAK TEST")
+# leak_test_dict = {}
+# v1_leak_test_ports = list(range(1,13))
+# v2_leak_test_ports = list(range(1,13))
 
-while True:
-	run = 1
-	leak_test_valve1_dict, leak_status_valve1_dict = leak_test_multiple_ports(Actuator1, 1, v1_leak_test_ports, flow_rate_list)
-	leak_test_valve2_dict, leak_status_valve2_dict = leak_test_multiple_ports(Actuator2, 2, v2_leak_test_ports, flow_rate_list)
-	leak_test_dict.update(leak_test_valve1_dict)
-	leak_test_dict.update(leak_test_valve2_dict)
-	leak_test_df = pd.DataFrame.from_dict(leak_test_dict, orient='index').transpose()
-	logger.info('saving csv file at ./data/leak_test/')
-	leak_test_df.to_csv("./data/leak_test/%s_leak_test_run_%d.csv" %(unique_id, run))
-	# plot
-	logger.info('plotting flow rate vs pressure. you can see the graph at ./plots/leak_test')
-	for valve in (1,2):
-		plot_leak_test(valve, v1_leak_test_ports, leak_test_df)
-		plot_leak_test(valve, v2_leak_test_ports, leak_test_df)
-	# display leak status
-	logger.info("Here is the leak status:\n%s\n%s" %(leak_status_valve1_dict, leak_status_valve2_dict))
-	# give user option to repair an rerun the leak test if there is leak
-	if 'leaking' in leak_status_valve1_dict.values() or leak_status_valve2_dict.values():
-		if get_user_confirmation("Do you want to repair the leaking tubes to rerun the leaking test? ", 30, 'n') == True:
-			run += 1
-			input('Repair those ports and press enter to continue')
-			try:
-				v1_leak_test_ports = list(map(int, input('what ports from valve 1 do you want to test (type them separated by comma): ').replace(' ', '').split(',')))
-			except ValueError:
-				v1_leak_test_ports = []
-			try:
-				v2_leak_test_ports = list(map(int, input('what ports from valve 2 do you want to test (type them separated by comma): ').replace(' ', '').split(',')))
-			except ValueError:
-				v2_leak_test_ports = []
-			continue
-		else:
-			break
-	else:
-		break
+# while True:
+# 	run = 1
+# 	leak_test_valve1_dict, leak_status_valve1_dict = leak_test_multiple_ports(Pump, Actuator1, 1, v1_leak_test_ports, flow_rate_list)
+# 	leak_test_valve2_dict, leak_status_valve2_dict = leak_test_multiple_ports(Pump, Actuator2, 2, v2_leak_test_ports, flow_rate_list)
+# 	leak_test_dict.update(leak_test_valve1_dict)
+# 	leak_test_dict.update(leak_test_valve2_dict)
+# 	leak_test_df = pd.DataFrame.from_dict(leak_test_dict, orient='index').transpose()
+# 	logger.info('saving csv file at ./data/leak_test/')
+# 	leak_test_df.to_csv("./data/leak_test/%s_leak_test_run_%d.csv" %(unique_id, run))
+# 	# plot
+# 	logger.info('plotting flow rate vs pressure. you can see the graph at ./plots/leak_test')
+# 	for valve in (1,2):
+# 		plot_leak_test(valve, v1_leak_test_ports, leak_test_df, unique_id)
+# 		plot_leak_test(valve, v2_leak_test_ports, leak_test_df, unique_id)
+# 	# display leak status
+# 	logger.info("Here is the leak status:\n%s\n%s" %(leak_status_valve1_dict, leak_status_valve2_dict))
+# 	# give user option to repair an rerun the leak test if there is leak
+# 	if ('leaking' in leak_status_valve1_dict.values()) or ('leaking' in leak_status_valve2_dict.values()):
+# 		if get_user_confirmation("Do you want to repair the leaking tubes to rerun the leaking test?[y/n] ", 30, 'n') == True:
+# 			run += 1
+# 			input('Repair those ports and press enter to continue')
+# 			try:
+# 				v1_leak_test_ports = list(map(int, input('what ports from valve 1 do you want to test (type them separated by comma): ').replace(' ', '').split(',')))
+# 			except ValueError:
+# 				v1_leak_test_ports = []
+# 			try:
+# 				v2_leak_test_ports = list(map(int, input('what ports from valve 2 do you want to test (type them separated by comma): ').replace(' ', '').split(',')))
+# 			except ValueError:
+# 				v2_leak_test_ports = []
+# 			continue
+# 		else:
+# 			break
+# 	else:
+# 		break
 
-logger.info("LEAK TEST COMPLETE")
+# logger.info("LEAK TEST COMPLETE")
 
-if get_user_confirmation('Do you want to continue to characterization test?(yes/no) ', 300, 'n') == False:
-	raise SystemExit
+# if get_user_confirmation('Do you want to continue to characterization test?[y/n] ', 300, 'n') == False:
+# 	raise SystemExit
 
 ############################################ CHARACTERIZATION RUN ################################################3
 logger.info("CHARACTERIZATION RUN")
@@ -199,7 +199,7 @@ logger.info("CHARACTERIZATION RUN")
 input("make sure there is at least 750 mL of water for test/characterization. Then press enter")
 while True:
 	# port selection
-	if get_user_confirmation("do you want to test all ports, flow rate? you can say \'no/n\'' if you want to manually select port and flow rate range. ", 30, 'y'):
+	if get_user_confirmation("do you want to test all ports, flow rate?[y/n] you can say \'n\'' if you want to manually select port and flow rate range. ", 30, 'y'):
 		ports_to_test = list(range(1,13))
 	else:
 		ports_to_test = list(map(int, input('what ports do you want to test (type them separated by comma): ').replace(' ', '').split(',')))
@@ -238,15 +238,16 @@ while True:
 		   Tubing inner diameter(Valve 2): %f\n\
 		   Minimium flow rate (mL/min): %f\n\
 		   Maximum flow rate (mL/min): %f\n\
+		   Ports to test: %s\n\
 		   Number of flow rates to test for each port: %d\n\
 		   Time at each point: %d seconds"\
-		   %(Valve1_Tube.inner_diameter, Valve2_Tube.inner_diameter, Pump.min_flow, Pump.max_flow, how_many_flow_rates, how_long_at_each_point))
+		   %(Valve1_Tube.inner_diameter, Valve2_Tube.inner_diameter, Pump.min_flow, Pump.max_flow, ports_to_test, how_many_flow_rates, how_long_at_each_point))
 	if which_valve_to_test == 1:
 		logger.info("Estimated time to complete the characterization: ~%f minutes" %(len(ports_to_test)*how_many_flow_rates*how_long_at_each_point/60))
 	if which_valve_to_test == 2:
 		logger.info("Estimated time to complete the characterization: ~%f minutes" %(2*len(ports_to_test)*how_many_flow_rates*how_long_at_each_point/60))
 	# if user not satisfied with estimated time of completion, can re-enter the parameters again
-	if get_user_confirmation("Satisfied with these selections? ", 30, 'y') == True:
+	if get_user_confirmation("Satisfied with these selections? [y/n] ", 30, 'y') == True:
 		break
 	else:
 		continue
@@ -257,16 +258,16 @@ flow_rate_list.append(Pump.max_flow)
 
 logger.info("STARTING CHARACTERIZATION TEST")
 if which_valve_to_test == 1:
-	char_df, settling_time_df = characterization_run(Actuator1, Valve1_Tube, 1, flow_rate_list)
+	char_df, settling_time_df = characterization_run(Pump, Actuator1, Valve1_Tube, 1, flow_rate_list, ports_to_test, how_long_at_each_point)
 	char_df.to_csv("./data/characterization/%s_characterization:valve1.csv" %unique_id)
 	settling_time_df.to_csv("./data/characterization/%s_characterization:pressure_settling_time:valve1.csv" %unique_id)
 if which_valve_to_test == 2:
-	char_df, settling_time_df = characterization_run(Actuator2, Valve2_Tube, 2, flow_rate_list)
+	char_df, settling_time_df = characterization_run(Pump, Actuator2, Valve2_Tube, 2, flow_rate_list, ports_to_test, how_long_at_each_point)
 	char_df.to_csv("./data/characterization/%s_characterization:valve2.csv" %unique_id)
 	settling_time.to_csv("./data/characterization/%s_characterization:pressure_settling_time:valve2.csv" %unique_id)
 if which_valve_to_test == 3:
-	char1_df, settling_time1_df = characterization_run(Actuator1, Valve1_Tube, 1, flow_rate_list)
-	char2_df, settling_time2_df = characterization_run(Actuator2,Valve2_Tube, 2, flow_rate_list)
+	char1_df, settling_time1_df = characterization_run(Pump, Actuator1, Valve1_Tube, 1, flow_rate_list, ports_to_test, how_long_at_each_point)
+	char2_df, settling_time2_df = characterization_run(Pump, Actuator2,Valve2_Tube, 2, flow_rate_list, ports_to_test, how_long_at_each_point)
 	char_df = pd.concat([char1_df, char2_df], axis = 1)
 	settling_time_df = pd.concat([settling_time1_df, settling_time2_df], axis = 1)
 	char_df.to_csv("./data/characterization/%s_characterization:valve1and2.csv" %unique_id)
@@ -289,7 +290,7 @@ if which_valve_to_test == 1 or which_valve_to_test == 2:
 	plot_pressure_vs_time(flow_rate_list, char_df, which_valve_to_test, ports_to_test, unique_id)
 elif which_valve_to_test == 3:
 	for valve in range(1,3): # 1 and 2 valves
-	plot_pressure_vs_time(flow_rate_list, char_df, valve, ports_to_test, unique_id)
+		plot_pressure_vs_time(flow_rate_list, char_df, valve, ports_to_test, unique_id)
 		
 
 # plot pressure vs flow rate
