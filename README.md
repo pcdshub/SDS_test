@@ -1,4 +1,15 @@
-<h2>Steps</h2>
+The purpose of this test is to characterize each port of sample delivery system. But first, pump pulsation is measured and each tubes is tested for leak. All these steps are carried out automatically by the python script.
+
+* HPLC Pump Pulsation Test
+At the beginning of the test, the software measures and reports pulsation of pump, with the option to repair the device and rerun the test.
+
+* Standard Leak Test
+The software steps through the ports using the flow profile as is determined by the pump model, testing for leaks. With the ports plugged, if the pressure reaches stability before the pump reaches an over pressure error, the pump has a leak. 
+
+* Characterization Run
+The standard characterization method is to test each port for settling time, pressure drop and flow rate characteristics of each port
+
+<h2>Running the test</h2>
 
 1. connect to ```username@psnxserv.slac.stanford.edu```
 
