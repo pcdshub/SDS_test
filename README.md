@@ -1,3 +1,5 @@
+<h2>Steps</h2>
+
 1. connect to ```username@psnxserv.slac.stanford.edu```
 
 2. Then ```psbuild-rhel<x>```
