@@ -4,3 +4,4 @@ plots/
 data/
 *.pyc
 tmp/
+*.png
