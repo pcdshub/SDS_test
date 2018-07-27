@@ -245,3 +245,46 @@ def plot_pressure_vs_flow_rate(flow_rates, df, valve, ports, uid):
 	plt.subplots_adjust(top = 0.85)
 	plt.savefig("./plots/characterization/%s_pressure_vs_flow_rate:valve%d" %(uid, valve))
 	plt.clf()
+	
+import xmlrpc.client as xmlrpclib
+import re
+import sys
+import getpass
+import os
+
+def post_to_confluence(space, parent_title, child_title, html_string, images):
+	# parent_title: there should be existing parent page
+	# child_title: child page is created with this title
+	# images : list of images to attach to confluence
+	# usage
+	# post_to_confluence("PCDS", "sample delivery system testing", "test child")
+	try: 
+		server = xmlrpclib.ServerProxy("https://confluence.slac.stanford.edu/rpc/xmlrpc", allow_none=True) 
+		# username = input("username:")
+		# pwd = getpass.getpass("password:")
+		# creds = [username, pwd]
+		creds = ["gaire01", "719185p2@"]
+		token = server.confluence2.login(creds[0],creds[1]) 
+		parent_page = server.confluence2.getPage(token, space, parent_title)
+		p = {}
+		p['content'] = html_string
+		p['space'] = space
+		p['title'] = child_title
+		p['parentId'] = parent_page['id'] 
+
+		server.confluence2.storePage(token, p) 
+		print ("Created page")
+
+		# add attachment to child page
+		for image in images:
+			child_page = server.confluence2.getPage(token, space, child_title)
+			attachment = {}
+			attachment["fileName"] = image;
+			attachment["contentType"] = 'image/png'
+			with open(image, 'rb') as f:
+				data = f.read()
+			server.confluence2.addAttachment(token, child_page['id'], attachment, xmlrpclib.Binary(data));	
+	except xmlrpclib.Fault as err: 
+	   print ("Error accessing Confluence:", sys.exc_info()[0], err.faultString)
+	except Exception as err: 
+	   print ("Unexpected error:", err)
