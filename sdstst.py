@@ -60,17 +60,17 @@ Pump.min_flow = flow_range_dict[this_pump][0]
 Pump.max_flow = flow_range_dict[this_pump][1]
 
 # #ask user input for which selector box version is being used
-# while True:
-#     try:
-#         sel_box_version = float(input("which selector box are you using?\n Mark [2/2.5/3]"))
-#     except ValueError:
-#         print ("sorry, I didn't understand that")
-#         continue
-#     if not sel_box_version in [2, 2.5, 3]:
-#         print("sorry, enter one of possible inputs, just the numbers")
-#         continue
-#     else:
-#         break
+while True:
+    try:
+        sel_box_version = float(input("which selector box are you using?\n Mark [2/2.5/3]"))
+    except ValueError:
+        print ("sorry, I didn't understand that")
+        continue
+    if not sel_box_version in [2, 2.5, 3]:
+        print("sorry, enter one of possible inputs, just the numbers")
+        continue
+    else:
+        break
 
 # get inner diameter of tube connected to valve 1 from user
 while True:
