@@ -29,5 +29,5 @@ data are saved as csv on ```.../SDS_tst/data```
 
 The software gives pressure and flow settling time, records and displays flow rate vs pressure, pressure vs time and volume vs time at the end of test. The software is able to identify and clear pump alarm such as over pressure error.
 
-Furthermore, all data are saved in confluence so that is easy for the SLAC technicians and the users of that specific selector box to be recalled at the beam line experiment.
+Furthermore, all data are saved in confluence so that it is easy for the SLAC technicians and the users of that specific selector box to be recalled at the beam line experiment.
 https://confluence.slac.stanford.edu/display/PCDS/sample+delivery+system+testing
