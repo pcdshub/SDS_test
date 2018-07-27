@@ -10,6 +10,4 @@
 
 logs are saved on ```.../SDS_tst/SDS_tst.log```
 
-plots are saved on ```.../SDS_tst/plots```
-
 data are saved as csv on ```.../SDS_tst/data```
