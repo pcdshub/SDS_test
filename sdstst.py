@@ -34,7 +34,7 @@ Valve1_Tube = Tube(color = 'black')
 Valve2_Tube = Tube(color = 'red')
 
 # unique id for the test based on date and time at which test was initiated
-unique_id = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+unique_id = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M")
 logger.info("---------------------------------")
 logger.info("---------------------------------")
 logger.info("---------------------------------")
@@ -107,91 +107,91 @@ Valve2_Tube.length = valve2_tube_inner_diameter
 
 
 ####################################### HPLC pump PULSATION TEST ###############################################
-# flow_rate = (Pump.min_flow + Pump.max_flow) / 2
-# logger.info("RUNNING HPLC PUMP PULSATION TEST")
-# # selecting the port for pulsation test
-# Actuator1.goto_port(5)
-# while True:
-# 	pulsation = Pump.get_pulsation(flow_rate)
-# 	logger.info("pulsation is %f" %pulsation)
-# 	if get_user_confirmation("satisfied with pulsation test? [y/n]\n\tpress y if you want to continue\n\tpress n if you want to rerun the test: ", 30, 'y') == True:
-# 		break
-# 	else:
-# 		input("did you repair the device? press enter key when ready")
-# 		logger.info("re-running the pulsation test...")
-# 		continue
-# logger.info("PULSATION TEST COMPLETE")
+flow_rate = (Pump.min_flow + Pump.max_flow) / 2
+logger.info("RUNNING HPLC PUMP PULSATION TEST")
+# selecting the port for pulsation test
+Actuator1.goto_port(5)
+while True:
+	pulsation = Pump.get_pulsation(flow_rate)
+	logger.info("pulsation is %f" %pulsation)
+	if get_user_confirmation("satisfied with pulsation test? [y/n]\n\tpress y if you want to continue\n\tpress n if you want to rerun the test: ", 30, 'y') == True:
+		break
+	else:
+		input("did you repair the device? press enter key when ready")
+		logger.info("re-running the pulsation test...")
+		continue
+logger.info("PULSATION TEST COMPLETE")
 
 
 ######################################### STANDATD LEAK TEST ####################################################
-# logger.info("LEAK TEST")
-# input("plug all water and sample valve ports. press  enter when done.")
-# # set max pressure to 500 more than upper pressure limit
-# while True:
-# 	try:
-# 		upper_pressure_limit = float(get_user_input("what is the upper pressure limit (psi) > ", 30, '3500'))
-# 		break
-# 	except ValueError:
-# 		print("This is not a valid number")
-# 		continue
-# Pump.max_pressure = upper_pressure_limit
+logger.info("LEAK TEST")
+input("plug all water and sample valve ports. press  enter when done.")
+# set max pressure to 500 more than upper pressure limit
+while True:
+	try:
+		upper_pressure_limit = float(get_user_input("what is the upper pressure limit (psi) > ", 30, '3500'))
+		break
+	except ValueError:
+		print("This is not a valid number")
+		continue
+Pump.max_pressure = upper_pressure_limit
 
-# # how many flow rates to test for each port
-# while True:
-# 	try:
-# 		how_many_flow_rates = int(get_user_input("how many flow rates do you want to test? ", 30, '10'))
-# 		break
-# 	except ValueError:
-# 		print("This is not a valid number")
-# 		continue
-# flow_rate_list = [Pump.min_flow + x*(Pump.max_flow-Pump.min_flow)/(how_many_flow_rates-1) for x in range(how_many_flow_rates-1)]
-# flow_rate_list.append(Pump.max_flow)
+# how many flow rates to test for each port
+while True:
+	try:
+		how_many_flow_rates = int(get_user_input("how many flow rates do you want to test? ", 30, '10'))
+		break
+	except ValueError:
+		print("This is not a valid number")
+		continue
+flow_rate_list = [Pump.min_flow + x*(Pump.max_flow-Pump.min_flow)/(how_many_flow_rates-1) for x in range(how_many_flow_rates-1)]
+flow_rate_list.append(Pump.max_flow)
 
-# # leak test for ports of both valves
-# logger.info("STARTING LEAK TEST")
-# leak_test_dict = {}
-# v1_leak_test_ports = list(range(1,13))
-# v2_leak_test_ports = list(range(1,13))
+# leak test for ports of both valves
+logger.info("STARTING LEAK TEST")
+leak_test_dict = {}
+v1_leak_test_ports = list(range(1,13))
+v2_leak_test_ports = list(range(1,13))
 
-# while True:
-# 	run = 1
-# 	leak_test_valve1_dict, leak_status_valve1_dict = leak_test_multiple_ports(Pump, Actuator1, 1, v1_leak_test_ports, flow_rate_list)
-# 	leak_test_valve2_dict, leak_status_valve2_dict = leak_test_multiple_ports(Pump, Actuator2, 2, v2_leak_test_ports, flow_rate_list)
-# 	leak_test_dict.update(leak_test_valve1_dict)
-# 	leak_test_dict.update(leak_test_valve2_dict)
-# 	leak_test_df = pd.DataFrame.from_dict(leak_test_dict, orient='index').transpose()
-# 	logger.info('saving csv file at ./data/leak_test/')
-# 	leak_test_df.to_csv("./data/leak_test/%s_leak_test_run_%d.csv" %(unique_id, run))
-# 	# plot
-# 	logger.info('plotting flow rate vs pressure. you can see the graph at ./plots/leak_test')
-# 	for valve in (1,2):
-# 		plot_leak_test(valve, v1_leak_test_ports, leak_test_df, unique_id)
-# 		plot_leak_test(valve, v2_leak_test_ports, leak_test_df, unique_id)
-# 	# display leak status
-# 	logger.info("Here is the leak status:\n%s\n%s" %(leak_status_valve1_dict, leak_status_valve2_dict))
-# 	# give user option to repair an rerun the leak test if there is leak
-# 	if ('leaking' in leak_status_valve1_dict.values()) or ('leaking' in leak_status_valve2_dict.values()):
-# 		if get_user_confirmation("Do you want to repair the leaking tubes to rerun the leaking test?[y/n] ", 30, 'n') == True:
-# 			run += 1
-# 			input('Repair those ports and press enter to continue')
-# 			try:
-# 				v1_leak_test_ports = list(map(int, input('what ports from valve 1 do you want to test (type them separated by comma): ').replace(' ', '').split(',')))
-# 			except ValueError:
-# 				v1_leak_test_ports = []
-# 			try:
-# 				v2_leak_test_ports = list(map(int, input('what ports from valve 2 do you want to test (type them separated by comma): ').replace(' ', '').split(',')))
-# 			except ValueError:
-# 				v2_leak_test_ports = []
-# 			continue
-# 		else:
-# 			break
-# 	else:
-# 		break
+while True:
+	run = 1
+	leak_test_valve1_dict, leak_status_valve1_dict = leak_test_multiple_ports(Pump, Actuator1, 1, v1_leak_test_ports, flow_rate_list)
+	leak_test_valve2_dict, leak_status_valve2_dict = leak_test_multiple_ports(Pump, Actuator2, 2, v2_leak_test_ports, flow_rate_list)
+	leak_test_dict.update(leak_test_valve1_dict)
+	leak_test_dict.update(leak_test_valve2_dict)
+	leak_test_df = pd.DataFrame.from_dict(leak_test_dict, orient='index').transpose()
+	logger.info('saving csv file at ./data/leak_test/')
+	leak_test_df.to_csv("./data/leak_test/%s_leak_test_run_%d.csv" %(unique_id, run))
+	# plot
+	logger.info('plotting flow rate vs pressure. you can see the graph at ./plots/leak_test')
+	for valve in (1,2):
+		plot_leak_test(valve, v1_leak_test_ports, leak_test_df, unique_id)
+		plot_leak_test(valve, v2_leak_test_ports, leak_test_df, unique_id)
+	# display leak status
+	logger.info("Here is the leak status:\n%s\n%s" %(leak_status_valve1_dict, leak_status_valve2_dict))
+	# give user option to repair an rerun the leak test if there is leak
+	if ('leaking' in leak_status_valve1_dict.values()) or ('leaking' in leak_status_valve2_dict.values()):
+		if get_user_confirmation("Do you want to repair the leaking tubes to rerun the leaking test?[y/n] ", 30, 'n') == True:
+			run += 1
+			input('Repair those ports and press enter to continue')
+			try:
+				v1_leak_test_ports = list(map(int, input('what ports from valve 1 do you want to test (type them separated by comma): ').replace(' ', '').split(',')))
+			except ValueError:
+				v1_leak_test_ports = []
+			try:
+				v2_leak_test_ports = list(map(int, input('what ports from valve 2 do you want to test (type them separated by comma): ').replace(' ', '').split(',')))
+			except ValueError:
+				v2_leak_test_ports = []
+			continue
+		else:
+			break
+	else:
+		break
 
-# logger.info("LEAK TEST COMPLETE")
+logger.info("LEAK TEST COMPLETE")
 
-# if get_user_confirmation('Do you want to continue to characterization test?[y/n] ', 300, 'n') == False:
-# 	raise SystemExit
+if get_user_confirmation('Do you want to continue to characterization test?[y/n] ', 300, 'n') == False:
+	raise SystemExit
 
 ############################################ CHARACTERIZATION RUN ################################################3
 logger.info("CHARACTERIZATION RUN")
@@ -305,3 +305,79 @@ if which_valve_to_test == 3:
 logger.info("visit ./plots/characterization to view the plots")
 
 ##################################################### Saving results to confluence ################################################################
+
+# save device  and test information to a text file
+ti = open("test_info.txt", "w+")
+ti.write("unique id: %s\n" %unique_id)
+ti.write("Pump type: %s\n" %pumps_dict[which_pump])
+ti.write("Selector box version: %.1f\n" %sel_box_version)
+ti.write("valve 1 tube inner diameter: %.4f um\n" %valve1_tube_inner_diameter)
+ti.write("valve 2 tube inner diameter: %.4f um\n" %valve2_tube_inner_diameter)
+ti.write("Was inline filter changed? %s\n" %inline_filter_change_status)
+ti.write("pump pulsation: %.4f percent\n\n" %pulsation)
+ti.write("LEAK TEST INFO\n")
+ti.write("upper pressure limit: %.4f psi\n\n" %upper_pressure_limit)
+ti.write("CHARACTERIZATION RUN INFO\n")
+ti.write("Ports tested: %s\n" %ports_to_test)
+ti.write("Flow rates tested: %s ml/min\n" %flow_rate_list)
+ti.write("Time spent on each point: %d seconds\n" %how_long_at_each_point)
+if which_valve_to_test == 1:
+	ti.write("Valve tested: Water\n")
+elif which_valve_to_test == 2:
+	ti.write("Valve tested: Sample\n")
+elif which_valve_to_test == 3:
+	ti.write("Valve tested: Water, Sample\n")
+ti.close()
+
+images_to_attach = []
+
+if get_user_confirmation("Do you want to save the data to confluence?[y/n]  ", 30000, 'y') == True:
+	# device info
+	contents = open("test_info.txt", "r")
+	with open("test_info.html", "w+") as e:
+		for lines in contents.readlines():
+			e.write(lines.replace("\n","")+"<br />\n")
+		# leak test image
+		e.write("<h2>LEAK TEST PLOTS</h2><br />\n")
+		e.write('<p><ac:image><ri:attachment ri:filename="leakv1_pressure_vs_flow_rate.png"/></ac:image></p>')
+		images_to_attach.append("leakv1_pressure_vs_flow_rate.png")
+		e.write('<p><ac:image><ri:attachment ri:filename="leakv2_pressure_vs_flow_rate.png"/></ac:image></p>')
+		images_to_attach.append("leakv2_pressure_vs_flow_rate.png")
+		
+		# characterization run image
+		e.write("<h2>CHARACTERIZATION</h2><br />\n")
+		if which_valve_to_test == 1:
+			e.write('<p><ac:image><ri:attachment ri:filename="charv1_pressure_vs_time.png"/></ac:image></p>')
+			images_to_attach.append("charv1_pressure_vs_time.png")
+			e.write('<p><ac:image><ri:attachment ri:filename="charv1_volume_vs_time.png"/></ac:image></p>')
+			images_to_attach.append("charv1_volume_vs_time.png")
+			e.write('<p><ac:image><ri:attachment ri:filename="charv1_pressure_vs_flow_rate.png"/></ac:image></p>')
+			images_to_attach.append("charv1_pressure_vs_flow_rate.png")
+
+		elif which_valve_to_test == 2:
+			e.write('<p><ac:image><ri:attachment ri:filename="charv2_pressure_vs_time.png"/></ac:image></p>')
+			images_to_attach.append("charv2_pressure_vs_time.png")
+			e.write('<p><ac:image><ri:attachment ri:filename="charv2_volume_vs_time.png"/></ac:image></p>')
+			images_to_attach.append("charv2_volume_vs_time.png")
+			e.write('<p><ac:image><ri:attachment ri:filename="charv2_pressure_vs_flow_rate.png"/></ac:image></p>')
+			images_to_attach.append("charv2_pressure_vs_flow_rate.png")
+		elif which_valve_to_test == 3:
+			e.write('<p><ac:image><ri:attachment ri:filename="charv1_pressure_vs_time.png"/></ac:image></p>')
+			images_to_attach.append("charv1_pressure_vs_time.png")
+			e.write('<p><ac:image><ri:attachment ri:filename="charv1_volume_vs_time.png"/></ac:image></p>')
+			images_to_attach.append("charv1_volume_vs_time.png")
+			e.write('<p><ac:image><ri:attachment ri:filename="charv1_pressure_vs_flow_rate.png"/></ac:image></p>')
+			images_to_attach.append("charv1_pressure_vs_flow_rate.png")
+			e.write('<p><ac:image><ri:attachment ri:filename="charv2_pressure_vs_time.png"/></ac:image></p>')
+			images_to_attach.append("charv2_pressure_vs_time.png")
+			e.write('<p><ac:image><ri:attachment ri:filename="charv2_volume_vs_time.png"/></ac:image></p>')
+			images_to_attach.append("charv2_volume_vs_time.png")
+			e.write('<p><ac:image><ri:attachment ri:filename="charv2_pressure_vs_flow_rate.png"/></ac:image></p>')
+			images_to_attach.append("charv2_pressure_vs_flow_rate.png")
+
+html_file = open('test_info.html', 'r')
+html_string = html_file.read().strip().replace("\n","")
+html_file.close()
+
+from confluence import post_to_confluence
+post_to_confluence("PCDS", "sample delivery system testing", unique_id, html_string, images_to_attach)
