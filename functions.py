@@ -260,10 +260,9 @@ def post_to_confluence(space, parent_title, child_title, html_string, images):
 	# post_to_confluence("PCDS", "sample delivery system testing", "test child")
 	try: 
 		server = xmlrpclib.ServerProxy("https://confluence.slac.stanford.edu/rpc/xmlrpc", allow_none=True) 
-		# username = input("username:")
-		# pwd = getpass.getpass("password:")
-		# creds = [username, pwd]
-		creds = ["gaire01", "719185p2@"]
+		username = input("username:")
+		pwd = getpass.getpass("password:")
+		creds = [username, pwd]
 		token = server.confluence2.login(creds[0],creds[1]) 
 		parent_page = server.confluence2.getPage(token, space, parent_title)
 		p = {}
