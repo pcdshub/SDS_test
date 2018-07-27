@@ -191,7 +191,7 @@ def characterization_run(pump_object, actuator_object, tube_object, valve_number
 	return characterization_df, pumping_settling_time_df
 
 # plot from leak test data ----------------------------------------------------
-def plot_leak_test(valve, leak_test_ports, leak_test_df, uid):
+def plot_leak_test(valve, leak_test_ports, leak_test_df):
 	for index, port in enumerate(leak_test_ports):
 		plt.subplot(1, len(leak_test_ports), port)
 		plt.plot(leak_test_df['flow_rate:valve%d:port%d'%(valve, port)], leak_test_df['pressure:valve%d:port%d'%(valve, port)])
@@ -201,12 +201,12 @@ def plot_leak_test(valve, leak_test_ports, leak_test_df, uid):
 	plt.tight_layout()
 	plt.suptitle('pressure vs flow rate for valve %d' %valve)
 	plt.subplots_adjust(top = 0.85)
-	plt.savefig("./plots/leak_test/%s_pressure_vs_flow_rate:valve%d" %(uid, valve))
+	plt.savefig("leakv%d_pressure_vs_flow_rate.png" %valve)
 	plt.clf()
 
 
 # plot from characterization data ----------------------------------------------
-def plot_vol_vs_time(flow_rates, df, valve, ports, uid):
+def plot_vol_vs_time(flow_rates, df, valve, ports):
 	for index, flow_rate in enumerate(flow_rates):
 		for i, port in enumerate(ports):
 			plt.subplot(1, len(ports), i+1)
@@ -215,10 +215,10 @@ def plot_vol_vs_time(flow_rates, df, valve, ports, uid):
 			plt.ylabel('volume used (mL)')
 		plt.legend(['%.4f mL/min' %flow_rate for flow_rate in flow_rates])
 		plt.suptitle("valve %d" %valve, fontsize="x-large")
-	plt.savefig("./plots/characterization/%s_volume_vs_time:valve_%d" %(uid, valve))
+	plt.savefig("charv%d_volume_vs_time.png" %valve)
 	plt.clf()
 
-def plot_pressure_vs_time(flow_rates, df, valve, ports, uid):
+def plot_pressure_vs_time(flow_rates, df, valve, ports):
 	for index, flow_rate in enumerate(flow_rates):
 		for i, port in enumerate(ports):
 			plt.subplot(1, len(ports), i+1)
@@ -227,10 +227,10 @@ def plot_pressure_vs_time(flow_rates, df, valve, ports, uid):
 			plt.ylabel('pressure (psi)')
 		plt.legend(['%.4f mL/min' %flow_rate for flow_rate in flow_rates])
 		plt.suptitle("valve %d" %valve, fontsize="x-large")
-	plt.savefig("./plots/characterization/%s_pressure_vs_time:valve_%d" %(uid, valve))
+	plt.savefig("charv%d_pressure_vs_time.png" %valve)
 	plt.clf()
 
-def plot_pressure_vs_flow_rate(flow_rates, df, valve, ports, uid):
+def plot_pressure_vs_flow_rate(flow_rates, df, valve, ports):
 	for i, port in enumerate(ports):
 		final_pressure = []
 		for i_f, flow_rate in enumerate(flow_rates):
@@ -243,7 +243,7 @@ def plot_pressure_vs_flow_rate(flow_rates, df, valve, ports, uid):
 	plt.tight_layout()
 	plt.suptitle("pressure vs flowrate for valve %d" %valve, fontsize = 'x-large')
 	plt.subplots_adjust(top = 0.85)
-	plt.savefig("./plots/characterization/%s_pressure_vs_flow_rate:valve%d" %(uid, valve))
+	plt.savefig("charv%d_pressure_vs_flow_rate.png" %valve)
 	plt.clf()
 	
 import xmlrpc.client as xmlrpclib
