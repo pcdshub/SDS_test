@@ -5,3 +5,5 @@ data/
 *.pyc
 tmp/
 *.png
+*.txt
+*.html
