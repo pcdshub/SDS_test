@@ -24,3 +24,9 @@ The standard characterization method is to test each port for settling time, pre
 logs are saved on ```.../SDS_tst/SDS_tst.log```
 
 data are saved as csv on ```.../SDS_tst/data```
+
+<h3>Outcome</h3>:
+
+The software gives pressure and flow settling time, records and displays flow rate vs pressure, pressure vs time and volume vs time at the end of test. The software is able to identify and clear pump alarm such as over pressure error.
+
+Furthermore, all data are saved in a place that is easy for the SLAC technicians and the users of that specific selector box to be recalled at the beam line experiment.
