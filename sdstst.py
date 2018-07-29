@@ -16,6 +16,11 @@ handlers = [logging.FileHandler('SDS_test.log'), logging.StreamHandler()]
 logging.basicConfig(level = level, format = format, handlers = handlers)
 logger = logging.getLogger(__name__)
 
+# creat data directory if it already doesnot exists
+data_dir = os.path.abspath('.') + '/data' 
+if not os.path.exists(data_dir):
+	os.makedirs(data_dir)
+
 # # TODO ask user for prefix / macros. or set them based on selector box and pump version if possible
 # prefix_sel_box = input('enter the prefix that is being used for selector box')
 prefix_sel_box = 'TST:SDS:SEL2:'
