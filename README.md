@@ -19,7 +19,7 @@ The standard characterization method is to test each port for settling time, pre
 
 4. colne this repository ```git clone https://github.com/pawanon61/SDS_test.git``` and ```cd SDS_test```
 
-5. run ```python sdstest.py```
+5. run ```python sdstst.py```
 
 logs are saved on ```.../SDS_tst/SDS_tst.log```
 
