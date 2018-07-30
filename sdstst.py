@@ -366,7 +366,7 @@ ti.close()
 
 images_to_attach = []
 
-if get_user_confirmation("Do you want to save the data to confluence?[y/n]  ", 30000, 'y') == True:
+if get_user_confirmation("Do you want to save the data to confluence?[y/n]  ", 6000, 'y') == True:
 	# device info
 	contents = open("test_info.txt", "r")
 	with open("test_info.html", "w+") as e:
