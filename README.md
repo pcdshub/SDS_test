@@ -13,17 +13,17 @@ The standard characterization method is to test each port for settling time, pre
 
 1. connect to ```username@psnxserv.slac.stanford.edu```
 
-2. Then ```psbuild-rhel<x>```
+2. Then ```ssh psbuild-rhel<x>```
 
 3. source the conda environment: ```source /reg/g/pcds/pyps/conda/pcds_conda```
 
-4. navigate to SDS_tst which is at ```/reg/neh/home5/gaire01/SDS_tst```
+4. colne this repository ```/reg/neh/home5/gaire01/SDS_tst``` and ```cd SDS_test```
 
-5. run ```python test.py```
+5. run ```python sdstest.py```
 
 logs are saved on ```.../SDS_tst/SDS_tst.log```
 
-data are saved as csv on ```.../SDS_tst/data```
+data are saved as csv on ```.../SDS_test/data```
 
 <h3>Outcome</h3>
 
