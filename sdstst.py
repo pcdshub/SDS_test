@@ -212,8 +212,42 @@ while True:
 			how_many_flow_rates = int(input("How many flow rates do you want to test for each port? "))
 			break
 		except ValueError:
-			print ("sorry, I didn't understand that")
+			logger.error ("sorry, I didn't understand that. input integer value")
 			continue
+	
+	if get_user_confirmation("do you want to characterize over the entire flow range of the pump?[y/n] ", 30, 'y') == True:
+		flow_rate_list = [Pump.min_flow + x*(Pump.max_flow-Pump.min_flow)/(how_many_flow_rates-1) for x in range(how_many_flow_rates-1)]
+		flow_rate_list.append(Pump.max_flow)
+	else:
+		print("flow range capacity of pump is: %s" %flow_range_dict[this_pump])
+		while True:
+			try:
+				low_fr = float(input("what's the lowest flow rate to use? (mL/min) "))
+				if low_fr < Pump.min_flow:
+					low_fr = Pump.min_flow
+				assert low_fr < Pump.max_flow
+				break
+			except ValueError:
+				logger.error ("sorry, I didn't understand that. input float value")
+				continue
+			except AssertionError:
+				logger.error ("min flow rate cannot be greater than max value of the pump")
+				continue
+		while True:
+			try:
+				high_fr = float(input("what's the high flow rate to use? (mL/min) "))
+				if high_fr > Pump.max_flow:
+					high_fr = Pump.max_flow
+					assert high_fr > Pump.min_flow
+				break
+			except ValueError:
+				logger.error ("sorry, I didn't understand that. input float value")
+				continue
+			except AssertionError:
+				logger.error ("max flow rate cannot be greater than min value of the pump")
+				continue
+		flow_rate_list = [low_fr + x*(high_fr-low_fr)/(how_many_flow_rates-1) for x in range(how_many_flow_rates-1)]
+		flow_rate_list.append(high_fr)
 	# find if user wants to characterize one or both valves, defalut is only the sample valve
 	while True:
 		try:
@@ -255,9 +289,7 @@ while True:
 	else:
 		continue
 
-# below, it excludes the upper value in list that it returns
-flow_rate_list = [Pump.min_flow + x*(Pump.max_flow-Pump.min_flow)/(how_many_flow_rates-1) for x in range(how_many_flow_rates-1)]
-flow_rate_list.append(Pump.max_flow)
+
 
 logger.info("STARTING CHARACTERIZATION TEST")
 if which_valve_to_test == 1:
