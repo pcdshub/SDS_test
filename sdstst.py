@@ -21,11 +21,9 @@ data_dir = os.path.abspath('.') + '/data'
 if not os.path.exists(data_dir):
 	os.makedirs(data_dir)
 
-# # TODO ask user for prefix / macros. or set them based on selector box and pump version if possible
-# prefix_sel_box = input('enter the prefix that is being used for selector box')
-prefix_sel_box = 'TST:SDS:SEL2:'
-# prefix_pump = input('enter the prefix that is being used for the pump')
-prefix_pump = 'TST:LC20:SDS:'
+# ask user for prefix / macros.
+prefix_sel_box = input('enter the prefix that is being used for selector box (eg: TST:SDS:SEL2:)')
+prefix_pump = input('enter the prefix that is being used for the pump (eg: TST:LC20:SDS:)')
 
 # object initializations
 Pump = Pump(prefix_pump)
