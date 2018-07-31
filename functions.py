@@ -165,10 +165,7 @@ def characterization_run(pump_object, actuator_object, tube_object, valve_number
 					break
 				time_track += 1
 				read_pressure.append(pump_object.pressure)
-				if valve_number == 1:
-					read_volume_used.append(flow_rate * time_track/60) # unit is mL
-				if valve_number == 2:
-					read_volume_used.append(FlowMeter.get_volume_used('RES:%d:IntgFlow' %port)) # unit is uL
+				read_volume_used.append(flow_rate * time_track/60) # unit is mL
 				ft = time.time()
 				time.sleep(1-ft+it)
 				if time_track >= how_long_at_each_point:
