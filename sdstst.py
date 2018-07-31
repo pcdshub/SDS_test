@@ -134,14 +134,8 @@ while True:
 		continue
 Pump.max_pressure = upper_pressure_limit
 
-# how many flow rates to test for each port
-while True:
-	try:
-		how_many_flow_rates = int(get_user_input("how many flow rates do you want to test? ", 30, '10'))
-		break
-	except ValueError:
-		print("This is not a valid number")
-		continue
+# flow rates
+how_many_flow_rates = 10
 flow_rate_list = [Pump.min_flow + x*(Pump.max_flow-Pump.min_flow)/(how_many_flow_rates-1) for x in range(how_many_flow_rates-1)]
 flow_rate_list.append(Pump.max_flow)
 
