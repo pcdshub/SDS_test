@@ -22,8 +22,8 @@ if not os.path.exists(data_dir):
 	os.makedirs(data_dir)
 
 # ask user for prefix / macros.
-prefix_sel_box = input('enter the prefix that is being used for selector box (eg: TST:SDS:SEL2:)')
-prefix_pump = input('enter the prefix that is being used for the pump (eg: TST:LC20:SDS:)')
+prefix_sel_box = input('enter the prefix that is being used for selector box (eg: TST:SDS:SEL2:) ')
+prefix_pump = input('enter the prefix that is being used for the pump (eg: TST:LC20:SDS:) ')
 
 # object initializations
 Pump = Pump(prefix_pump)
