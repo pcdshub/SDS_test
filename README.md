@@ -17,7 +17,7 @@ The standard characterization method is to test each port for settling time, pre
 
 3. source the conda environment: ```source /reg/g/pcds/pyps/conda/pcds_conda```
 
-4. clone this repository ```git clone https://github.com/pawanon61/SDS_test.git``` and ```cd SDS_test```
+4. clone this repository ```git clone https://github.com/pcdshub/SDS_test.git``` and ```cd SDS_test```
 
 5. run ```python sdstst.py```
 
