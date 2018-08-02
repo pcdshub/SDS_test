@@ -406,4 +406,4 @@ html_file = open('test_info.html', 'r')
 html_string = html_file.read().strip().replace("\n","")
 html_file.close()
 
-post_to_confluence("PCDS", "sample delivery system auto test results", unique_id, html_string, images_to_attach)
+post_to_confluence("PCDS", "sample delivery system automated test", unique_id, html_string, images_to_attach)
