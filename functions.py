@@ -280,7 +280,7 @@ def post_to_confluence(space, parent_title, child_title, html_string, images):
 			with open(image, 'rb') as f:
 				data = f.read()
 			server.confluence2.addAttachment(token, child_page['id'], attachment, xmlrpclib.Binary(data));	
-		print ("visit the link to view the child page \n https://confluence.slac.stanford.edu/display/PCDS/sample+delivery+system+auto+test+results")
+		print ("visit the link to view the child page \n https://confluence.slac.stanford.edu/display/PCDS/sample+delivery+system+automated+test")
 		
 	except xmlrpclib.Fault as err: 
 	   print ("Error accessing Confluence:", sys.exc_info()[0], err.faultString)
